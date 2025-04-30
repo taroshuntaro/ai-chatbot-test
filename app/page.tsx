@@ -6,19 +6,23 @@
  * - ユーザー入力の処理
  * - OpenAI APIとの通信によるチャットボット応答の取得
  * - ローディング状態やエラーハンドリングの管理
+ * - LLMモデルの選択機能
  *
  * @module Home
  */
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import MessageList from "@/components/MessageList";
 import InputBar from "@/components/InputBar";
 import { getChatbotResponse } from "@/utils/openaiApi";
 import { Message } from "@/types/message";
+import { OpenAIModel, DEFAULT_MODEL } from "@/types/model";
 
-const Home: React.FC = () => {
+const MODEL_STORAGE_KEY = "preferred-ai-model";
+
+const Home = () => {
   // メッセージの状態管理（初期メッセージを含む）
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -29,8 +33,30 @@ const Home: React.FC = () => {
   ]);
   // ユーザー入力の状態管理
   const [input, setInput] = useState<string>("");
+  // 選択されたモデルの状態管理
+  const [selectedModel, setSelectedModel] =
+    useState<OpenAIModel>(DEFAULT_MODEL);
   // リクエスト処理中かどうかを追跡するref
   const processingRef = useRef<boolean>(false);
+
+  // ローカルストレージから保存されたモデル設定を読み込む
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      if (
+        savedModel &&
+        (savedModel === "gpt-3.5-turbo" || savedModel === "gpt-4o-mini")
+      ) {
+        setSelectedModel(savedModel);
+      }
+    }
+  }, []);
+
+  // モデル選択が変更されたときの処理
+  const handleModelChange = (model: OpenAIModel) => {
+    setSelectedModel(model);
+    localStorage.setItem(MODEL_STORAGE_KEY, model);
+  };
 
   /**
    * 一意のメッセージIDを生成する関数
@@ -46,7 +72,7 @@ const Home: React.FC = () => {
    * @returns サニタイズされたテキスト
    */
   const sanitizeInput = useCallback(
-    (input: string): string => input.trim(),
+    (inputText: string): string => inputText.trim(),
     []
   );
 
@@ -101,7 +127,8 @@ const Home: React.FC = () => {
       try {
         const response = await getChatbotResponse(
           sanitizedInput,
-          controller.signal
+          controller.signal,
+          selectedModel
         );
         clearTimeout(timeoutId);
 
@@ -145,16 +172,25 @@ const Home: React.FC = () => {
     } finally {
       processingRef.current = false;
     }
-  }, [input, generateMessageId, sanitizeInput]);
+  }, [input, generateMessageId, sanitizeInput, selectedModel]);
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 transition-colors duration-200">
+      <div className="w-full p-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-3xl mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
+            AI チャットボット
+          </h1>
+        </div>
+      </div>
       <MessageList messages={messages} />
       <InputBar
         input={input}
         setInput={setInput}
         handleSend={handleSend}
         setMessages={setMessages}
+        selectedModel={selectedModel}
+        onModelChange={handleModelChange}
       />
     </div>
   );

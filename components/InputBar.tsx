@@ -8,6 +8,7 @@
  * - セキュリティのための入力サニタイズ
  * - エンターキーによる送信（Shift+Enterによる改行対応）
  * - IME入力のハンドリング（日本語等の入力中は送信しない）
+ * - LLMモデル選択機能
  *
  * @module InputBar
  */
@@ -15,6 +16,8 @@
 
 import { useState, FC, ChangeEvent, KeyboardEvent, useCallback } from "react";
 import { Message } from "@/types/message";
+import { OpenAIModel } from "@/types/model";
+import ModelSelector from "@/components/ModelSelector";
 import DOMPurify from "dompurify";
 
 interface InputBarProps {
@@ -22,6 +25,8 @@ interface InputBarProps {
   setInput: (value: string) => void;
   handleSend: () => void;
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  selectedModel: OpenAIModel;
+  onModelChange: (model: OpenAIModel) => void;
 }
 
 /**
@@ -34,7 +39,8 @@ const InputBar: FC<InputBarProps> = ({
   input,
   setInput,
   handleSend,
-  setMessages,
+  selectedModel,
+  onModelChange,
 }) => {
   // IME入力中かどうかの状態（日本語などの入力中にEnterで確定できるようにするため）
   const [isComposing, setIsComposing] = useState(false);
@@ -83,6 +89,12 @@ const InputBar: FC<InputBarProps> = ({
   return (
     <div className="fixed bottom-0 left-0 w-full p-4 bg-white dark:bg-gray-800 shadow-inner border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <div className="max-w-3xl mx-auto flex flex-col">
+        <div className="flex justify-end mb-2 mr-20">
+          <ModelSelector
+            selectedModel={selectedModel}
+            onChange={onModelChange}
+          />
+        </div>
         <div className="flex items-center">
           <textarea
             value={input}

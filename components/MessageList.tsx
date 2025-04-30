@@ -161,7 +161,7 @@ const MessageList: FC<MessageListProps> = ({ messages }) => {
   };
 
   return (
-    <div className="relative flex-1 w-full h-screen flex flex-col pt-16">
+    <div className="relative flex-1 w-full h-screen flex flex-col">
       <div
         ref={containerRef}
         className="flex-1 overflow-y-auto px-4 sm:px-8 bg-gray-50 dark:bg-gray-800 transition-colors duration-200"

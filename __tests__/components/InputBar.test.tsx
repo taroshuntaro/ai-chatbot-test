@@ -2,11 +2,37 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import InputBar from "@/components/InputBar";
 import DOMPurify from "dompurify";
+import { OpenAIModel } from "@/types/model";
+import "@testing-library/jest-dom";
 
 // DOMPurifyをモック
 jest.mock("dompurify", () => ({
   sanitize: jest.fn((content) => content),
 }));
+
+// ModelSelectorコンポーネントをモック
+jest.mock("@/components/ModelSelector", () => {
+  return function MockModelSelector({
+    selectedModel,
+    onChange,
+  }: {
+    selectedModel: OpenAIModel;
+    onChange: (model: OpenAIModel) => void;
+  }) {
+    return (
+      <div data-testid="model-selector">
+        <select
+          data-testid="mock-model-selector"
+          value={selectedModel}
+          onChange={(e) => onChange(e.target.value as OpenAIModel)}
+        >
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="gpt-4o-mini">GPT-4o Mini</option>
+        </select>
+      </div>
+    );
+  };
+});
 
 describe("InputBar コンポーネント", () => {
   // テスト用のprops
@@ -15,6 +41,8 @@ describe("InputBar コンポーネント", () => {
     setInput: jest.fn(),
     handleSend: jest.fn(),
     setMessages: jest.fn(),
+    selectedModel: "gpt-4o-mini" as OpenAIModel,
+    onModelChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -31,6 +59,10 @@ describe("InputBar コンポーネント", () => {
     // 送信ボタンが存在することを確認
     const button = screen.getByRole("button", { name: /送信/i });
     expect(button).toBeInTheDocument();
+
+    // モデルセレクターが存在することを確認
+    const modelSelector = screen.getByTestId("model-selector");
+    expect(modelSelector).toBeInTheDocument();
   });
 
   it("入力値が変更されると、setInput関数が呼ばれること", () => {
@@ -159,5 +191,18 @@ describe("InputBar コンポーネント", () => {
     expect(mockProps.setInput.mock.calls[0][0].length).toBeLessThanOrEqual(
       1000
     );
+  });
+
+  it("モデルが変更されると、onModelChange関数が呼ばれること", () => {
+    render(<InputBar {...mockProps} />);
+
+    // モデルセレクターを取得
+    const modelSelector = screen.getByTestId("mock-model-selector");
+
+    // モデルを変更
+    fireEvent.change(modelSelector, { target: { value: "gpt-3.5-turbo" } });
+
+    // onModelChange関数が正しく呼ばれたことを確認
+    expect(mockProps.onModelChange).toHaveBeenCalledWith("gpt-3.5-turbo");
   });
 });

@@ -8,6 +8,7 @@
  * 2. WebSearch機能による最新情報の補完
  * 3. エラーハンドリングとタイムアウト処理
  * 4. Markdownフォーマットによるリッチテキスト応答
+ * 5. 複数のLLMモデル選択のサポート
  *
  * @module api/openai
  */
@@ -22,6 +23,7 @@ import {
   generateInitialResponse,
   generateResponseWithWebSearch,
 } from "@/app/utils/openai/apiUtils";
+import { OpenAIModel, DEFAULT_MODEL, AVAILABLE_MODELS } from "@/types/model";
 
 // OpenAIのクライアントを初期化
 const openai = new OpenAI({
@@ -70,7 +72,7 @@ export async function POST(req: Request) {
 
     // リクエストボディをパース
     const body = await req.json();
-    const { prompt } = body;
+    const { prompt, model } = body;
 
     // 入力の検証
     if (!prompt || typeof prompt !== "string") {
@@ -79,6 +81,12 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    // モデルの検証（有効なモデルが指定されていない場合はデフォルトを使用）
+    const selectedModel: OpenAIModel =
+      model && AVAILABLE_MODELS.includes(model as OpenAIModel)
+        ? (model as OpenAIModel)
+        : DEFAULT_MODEL;
 
     // 入力のサニタイズ
     const sanitizedPrompt = sanitizeInput(prompt);
@@ -91,7 +99,8 @@ export async function POST(req: Request) {
       // 初期応答を生成
       const responseContent = await generateInitialResponse(
         sanitizedPrompt,
-        controller.signal
+        controller.signal,
+        selectedModel
       );
 
       // Web検索が必要かチェック
@@ -100,7 +109,8 @@ export async function POST(req: Request) {
         console.log("Web検索による情報の補完が必要と判断されました");
         finalResponse = await generateResponseWithWebSearch(
           sanitizedPrompt,
-          responseContent
+          responseContent,
+          selectedModel
         );
       }
 

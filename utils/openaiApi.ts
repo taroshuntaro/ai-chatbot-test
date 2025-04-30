@@ -8,9 +8,12 @@
  * - タイムアウト処理
  * - エラーハンドリングと適切なエラーメッセージの提供
  * - レスポンスデータの型変換と検証
+ * - LLMモデル選択のサポート
  *
  * @module openaiApi
  */
+
+import { OpenAIModel, DEFAULT_MODEL } from "@/types/model";
 
 /**
  * バックエンドのOpenAI APIエンドポイントを呼び出してチャットボットの応答を取得する
@@ -21,11 +24,13 @@
  *
  * @param prompt ユーザーの質問/入力
  * @param signal AbortSignal（タイムアウト処理用）
+ * @param model 使用するLLMモデル
  * @returns テキスト応答、HTML（マークダウンレンダリング済）、フォーマットフラグを含むオブジェクト
  */
 export async function getChatbotResponse(
   prompt: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  model: OpenAIModel = DEFAULT_MODEL
 ): Promise<{ text: string; html?: string; isMarkdown?: boolean }> {
   try {
     // 入力値の検証
@@ -42,7 +47,10 @@ export async function getChatbotResponse(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ prompt: sanitizedPrompt }),
+      body: JSON.stringify({
+        prompt: sanitizedPrompt,
+        model: model,
+      }),
       signal, // タイムアウトシグナルを渡す
     });
 

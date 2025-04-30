@@ -1,4 +1,5 @@
 import { getChatbotResponse } from "@/utils/openaiApi";
+import { DEFAULT_MODEL } from "@/types/model";
 
 // fetchのモック
 global.fetch = jest.fn();
@@ -33,7 +34,48 @@ describe("openaiApi ユーティリティ", () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: "テスト質問" }),
+        body: JSON.stringify({
+          prompt: "テスト質問",
+          model: DEFAULT_MODEL,
+        }),
+        signal: undefined,
+      });
+
+      // 結果が正しいことを確認
+      expect(result).toEqual({
+        text: "これはテスト回答です",
+        html: "<p>これはテスト回答です</p>",
+        isMarkdown: true,
+      });
+    });
+
+    test("モデルを指定して呼び出せること", async () => {
+      // fetchのモック実装
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce({
+          text: "これはテスト回答です",
+          html: "<p>これはテスト回答です</p>",
+          isMarkdown: true,
+        }),
+      });
+
+      const result = await getChatbotResponse(
+        "テスト質問",
+        undefined,
+        "gpt-3.5-turbo"
+      );
+
+      // fetchが正しく呼び出されたことを確認
+      expect(global.fetch).toHaveBeenCalledWith("/api/openai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: "テスト質問",
+          model: "gpt-3.5-turbo",
+        }),
         signal: undefined,
       });
 
@@ -66,6 +108,8 @@ describe("openaiApi ユーティリティ", () => {
 
       // 送信されたプロンプトが1000文字に制限されていることを確認
       expect(requestBody.prompt.length).toBe(1000);
+      // モデルが設定されていることを確認
+      expect(requestBody.model).toBe(DEFAULT_MODEL);
     });
 
     test("エラーレスポンスを適切に処理すること", async () => {

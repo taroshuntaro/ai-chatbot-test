@@ -7,6 +7,7 @@
 
 import OpenAI from "openai";
 import { extractSearchKeywords, performWebSearch } from "./webSearch";
+import { OpenAIModel, DEFAULT_MODEL } from "@/types/model";
 
 // OpenAIのクライアントを初期化
 const openai = new OpenAI({
@@ -32,11 +33,13 @@ export function sanitizeInput(input: string): string {
  *
  * @param prompt ユーザーの質問
  * @param signal アボートシグナル（タイムアウト用）
+ * @param model 使用するLLMモデル
  * @returns AIの初期応答
  */
 export async function generateInitialResponse(
   prompt: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  model: OpenAIModel = DEFAULT_MODEL
 ): Promise<string> {
   const messages = [
     {
@@ -49,7 +52,7 @@ export async function generateInitialResponse(
 
   const initialResponse = await openai.chat.completions.create(
     {
-      model: "gpt-4o-mini",
+      model: model,
       messages: messages,
       max_tokens: 1000,
       temperature: 0.7,
@@ -70,11 +73,13 @@ export async function generateInitialResponse(
  *
  * @param prompt ユーザーの質問
  * @param initialResponse AIの初期応答
+ * @param model 使用するLLMモデル
  * @returns Web検索結果で補完された応答
  */
 export async function generateResponseWithWebSearch(
   prompt: string,
-  initialResponse: string
+  initialResponse: string,
+  model: OpenAIModel = DEFAULT_MODEL
 ): Promise<string> {
   try {
     // 検索キーワード抽出
@@ -121,7 +126,7 @@ export async function generateResponseWithWebSearch(
     ];
 
     const finalResponse = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: model,
       messages: finalMessages,
       max_tokens: 1000,
       temperature: 0.7,
