@@ -1,13 +1,25 @@
+/**
+ * チャットボットアプリケーションのメインページコンポーネント
+ *
+ * このコンポーネントは、チャットインターフェースの主要な機能を実装しています：
+ * - メッセージリストの表示と管理
+ * - ユーザー入力の処理
+ * - OpenAI APIとの通信によるチャットボット応答の取得
+ * - ローディング状態やエラーハンドリングの管理
+ *
+ * @module Home
+ */
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import MessageList from "../components/MessageList";
-import InputBar from "../components/InputBar";
 import { v4 as uuidv4 } from "uuid";
-import { getChatbotResponse } from "../utils/openaiApi";
+import MessageList from "@/components/MessageList";
+import InputBar from "@/components/InputBar";
+import { getChatbotResponse } from "@/utils/openaiApi";
 import { Message } from "@/types/message";
 
 const Home: React.FC = () => {
+  // メッセージの状態管理（初期メッセージを含む）
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "bot",
@@ -15,26 +27,48 @@ const Home: React.FC = () => {
       id: uuidv4(),
     },
   ]);
+  // ユーザー入力の状態管理
   const [input, setInput] = useState<string>("");
-  const processingRef = useRef<boolean>(false); // 処理中かどうかを追跡
+  // リクエスト処理中かどうかを追跡するref
+  const processingRef = useRef<boolean>(false);
 
-  // メッセージIDを生成する関数
-  const generateMessageId = useCallback(() => {
-    return uuidv4();
-  }, []);
+  /**
+   * 一意のメッセージIDを生成する関数
+   * @returns 一意のUUID
+   */
+  const generateMessageId = useCallback(() => uuidv4(), []);
 
-  // 入力文字列を検証・サニタイズする関数
-  const sanitizeInput = useCallback((input: string): string => {
-    // 基本的なサニタイズ (XSS対策)
-    return input.trim();
-  }, []);
+  /**
+   * ユーザー入力をサニタイズする関数
+   * 入力の前後の空白を削除
+   *
+   * @param input ユーザー入力テキスト
+   * @returns サニタイズされたテキスト
+   */
+  const sanitizeInput = useCallback(
+    (input: string): string => input.trim(),
+    []
+  );
 
+  /**
+   * メッセージ送信処理を行う関数
+   *
+   * 処理フロー:
+   * 1. 入力の検証と処理中チェック
+   * 2. ユーザーメッセージの追加
+   * 3. ローディングメッセージの表示
+   * 4. OpenAI APIからの応答取得
+   * 5. 応答メッセージの表示とローディングの削除
+   *
+   * エラーハンドリングとタイムアウト処理（30秒）も実装
+   */
   const handleSend = useCallback(async () => {
+    // 空のメッセージ送信や多重送信の防止
     if (input.trim() === "" || processingRef.current) return;
 
-    processingRef.current = true; // 処理中フラグをセット
+    processingRef.current = true;
     const sanitizedInput = sanitizeInput(input);
-    setInput(""); // 先に入力をクリア
+    setInput("");
 
     try {
       // ユーザーメッセージ追加
@@ -48,10 +82,8 @@ const Home: React.FC = () => {
         },
       ]);
 
-      // ローディングメッセージのID
+      // ローディングメッセージ追加
       const loadingMessageId = generateMessageId();
-
-      // ボットのローディングメッセージを追加
       setMessages((prev) => [
         ...prev,
         {
@@ -64,7 +96,7 @@ const Home: React.FC = () => {
 
       // OpenAI APIを呼び出して応答を取得
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒でタイムアウト
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
         const response = await getChatbotResponse(
@@ -75,12 +107,10 @@ const Home: React.FC = () => {
 
         // ローディングメッセージを削除し、実際の応答メッセージを追加
         setMessages((prev) => {
-          // ローディングメッセージを削除
           const filteredMessages = prev.filter(
             (msg) => msg.id !== loadingMessageId
           );
 
-          // 新しいボットメッセージを追加
           return [
             ...filteredMessages,
             {
@@ -98,12 +128,10 @@ const Home: React.FC = () => {
 
         // ローディングメッセージを削除し、エラーメッセージを追加
         setMessages((prev) => {
-          // ローディングメッセージを削除
           const filteredMessages = prev.filter(
             (msg) => msg.id !== loadingMessageId
           );
 
-          // エラーメッセージを追加
           return [
             ...filteredMessages,
             {
@@ -115,7 +143,7 @@ const Home: React.FC = () => {
         });
       }
     } finally {
-      processingRef.current = false; // 処理完了フラグをリセット
+      processingRef.current = false;
     }
   }, [input, generateMessageId, sanitizeInput]);
 
