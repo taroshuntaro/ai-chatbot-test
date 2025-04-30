@@ -11,5 +11,6 @@ export interface Message {
   html?: string; // Markdownから変換されたHTMLコンテンツ
   isMarkdown?: boolean; // コンテンツがMarkdown形式かどうかを示すフラグ
   isLoading?: boolean; // 処理中のメッセージかどうかを示すフラグ
+  timestamp?: string; // メッセージのタイムスタンプ
   searchResults?: SearchResult[]; // 検索結果を格納するための配列
 }

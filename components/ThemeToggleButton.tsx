@@ -8,7 +8,9 @@ const ThemeToggleButton: FC = () => {
 
   // マウント前は何も表示しない（SSRとCSRの不一致を防ぐため）
   if (!mounted) {
-    return <div className="w-12 h-6"></div>; // プレースホルダー
+    return (
+      <div className="w-12 h-6" data-testid="theme-toggle-placeholder"></div>
+    ); // プレースホルダー
   }
 
   return (
