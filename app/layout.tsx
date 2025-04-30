@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import { ReactNode } from "react";
@@ -23,10 +23,15 @@ export const metadata: Metadata = {
   title: "AI Chatbot Application",
   description:
     "An intelligent chatbot application to assist with your queries.",
-  viewport: "width=device-width, initial-scale=1",
   icons: {
     icon: "/favicon.ico",
   },
+};
+
+// viewportの設定を別途エクスポート
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 interface RootLayoutProps {
