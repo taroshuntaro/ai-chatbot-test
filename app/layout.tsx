@@ -39,7 +39,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="min-h-screen bg-gray-100 dark:bg-gray-900 text-black dark:text-white font-sans transition-colors duration-200">
         <div className="flex flex-col min-h-screen">
           <Header />
-          <main className="flex-grow px-4 sm:px-8 pt-16 pb-16">{children}</main>
+          <main className="flex-grow px-4 sm:px-8">{children}</main>
           <Footer />
         </div>
       </body>
