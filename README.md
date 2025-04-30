@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Apple 風デザインの個人ブログ
 
-## Getting Started
+このプロジェクトは、Apple のウェブサイトを参考にしたデザインの個人ブログです。Next.js と Tailwind CSS を使用して構築されています。
 
-First, run the development server:
+## セットアップ手順
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. 必要な依存関係をインストールします。
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```bash
+   npm install
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. 開発サーバーを起動します。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   npm run dev
+   ```
 
-## Learn More
+3. ブラウザで以下の URL を開きます。
 
-To learn more about Next.js, take a look at the following resources:
+   ```
+   http://localhost:3000
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 主な技術スタック
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Next.js**: React ベースのフレームワーク
+- **TypeScript**: 型安全な JavaScript
+- **Tailwind CSS**: ユーティリティファーストの CSS フレームワーク
 
-## Deploy on Vercel
+## カスタマイズ
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `tailwind.config.js`でカスタムカラーやフォントを設定しています。
+- `globals.css`で基本的なスタイルを定義しています。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## デプロイ
+
+本プロジェクトは Vercel を使用して簡単にデプロイできます。
