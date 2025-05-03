@@ -35,6 +35,24 @@ interface InputBarProps {
  */
 const MAX_INPUT_LENGTH = 1000;
 
+/**
+ * 入力欄のプレースホルダーテキスト
+ */
+const INPUT_PLACEHOLDER = "メッセージを入力...";
+
+/**
+ * テキストをサニタイズする関数
+ * DOMPurifyを使用してHTMLタグを削除し、XSS攻撃を防止します
+ * また、最大文字数を超える入力も切り捨てます
+ *
+ * @param text サニタイズする入力テキスト
+ * @returns サニタイズ済みテキスト
+ */
+const sanitizeInputText = (text: string): string => {
+  const sanitized = DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
+  return sanitized.substring(0, MAX_INPUT_LENGTH);
+};
+
 const InputBar: FC<InputBarProps> = ({
   input,
   setInput,
@@ -46,20 +64,6 @@ const InputBar: FC<InputBarProps> = ({
   const [isComposing, setIsComposing] = useState(false);
 
   /**
-   * 入力テキストをサニタイズする関数
-   *
-   * DOMPurifyを使用してHTMLタグを削除し、XSS攻撃を防止します
-   * また、最大文字数を超える入力も切り捨てます
-   *
-   * @param text サニタイズする入力テキスト
-   * @returns サニタイズ済みテキスト
-   */
-  const sanitizeInput = useCallback((text: string): string => {
-    const sanitized = DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
-    return sanitized.substring(0, MAX_INPUT_LENGTH);
-  }, []);
-
-  /**
    * テキストエリアの変更イベントハンドラ
    *
    * ユーザー入力をサニタイズして状態を更新します
@@ -67,7 +71,7 @@ const InputBar: FC<InputBarProps> = ({
    * @param e 変更イベント
    */
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const sanitizedInput = sanitizeInput(e.target.value);
+    const sanitizedInput = sanitizeInputText(e.target.value);
     setInput(sanitizedInput);
   };
 
@@ -86,6 +90,27 @@ const InputBar: FC<InputBarProps> = ({
     }
   };
 
+  /**
+   * IME入力開始ハンドラ
+   * 日本語などの入力が始まったことを記録
+   */
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+
+  /**
+   * IME入力終了ハンドラ
+   * 日本語などの入力が確定したことを記録
+   */
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
+
+  /**
+   * 送信ボタンが無効かどうかを判定
+   */
+  const isSubmitDisabled = !input.trim();
+
   return (
     <div className="fixed bottom-0 left-0 w-full p-4 bg-white dark:bg-gray-800 shadow-inner border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <div className="max-w-3xl mx-auto flex flex-col">
@@ -100,20 +125,20 @@ const InputBar: FC<InputBarProps> = ({
             value={input}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={() => setIsComposing(false)}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
             className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-none h-16 bg-white dark:bg-gray-700 text-black dark:text-white"
-            placeholder="メッセージを入力..."
+            placeholder={INPUT_PLACEHOLDER}
             aria-label="メッセージ入力"
             maxLength={MAX_INPUT_LENGTH}
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={isSubmitDisabled}
             className={`ml-4 p-3 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-transform transform active:scale-95 ${
-              input.trim()
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              isSubmitDisabled
+                ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                : "bg-blue-500 text-white hover:bg-blue-600"
             }`}
             aria-label="送信"
           >

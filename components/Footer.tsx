@@ -1,18 +1,58 @@
+/**
+ * フッターコンポーネント
+ *
+ * アプリケーションのフッター部分を表示するコンポーネントです。
+ * 著作権表示と各種リンク（利用規約、プライバシーポリシー、お問い合わせ）を含みます。
+ *
+ * @module Footer
+ */
 "use client";
 
 import { FC } from "react";
 import Link from "next/link";
 
-const FooterLink: FC<{ href: string; label: string }> = ({ href, label }) => (
+/**
+ * フッターリンクの型定義
+ */
+interface FooterLinkProps {
+  /** リンク先のURL */
+  href: string;
+  /** リンクのラベルテキスト */
+  label: string;
+}
+
+/**
+ * フッターナビゲーションのリンク情報
+ */
+const FOOTER_LINKS: FooterLinkProps[] = [
+  { href: "/terms", label: "利用規約" },
+  { href: "/privacy", label: "プライバシーポリシー" },
+  { href: "/contact", label: "お問い合わせ" },
+];
+
+/**
+ * フッターリンクコンポーネント
+ * 一貫したスタイルのリンクを表示します
+ *
+ * @param href リンク先のURL
+ * @param label リンクのラベルテキスト
+ */
+const FooterLink: FC<FooterLinkProps> = ({ href, label }) => (
   <Link
     href={href}
     className="text-blue-500 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-1"
+    aria-label={`${label}ページへ移動`}
   >
     {label}
   </Link>
 );
 
+/**
+ * フッターコンポーネント
+ * アプリケーションのフッター部分を表示します
+ */
 const Footer: FC = () => {
+  // 現在の年を取得（著作権表示用）
   const currentYear = new Date().getFullYear();
 
   return (
@@ -20,15 +60,11 @@ const Footer: FC = () => {
       <p className="mb-2">© {currentYear} AI Chatbot. All rights reserved.</p>
       <nav aria-label="フッターナビゲーション">
         <ul className="flex justify-center space-x-4 mt-2">
-          <li>
-            <FooterLink href="/terms" label="利用規約" />
-          </li>
-          <li>
-            <FooterLink href="/privacy" label="プライバシーポリシー" />
-          </li>
-          <li>
-            <FooterLink href="/contact" label="お問い合わせ" />
-          </li>
+          {FOOTER_LINKS.map((link) => (
+            <li key={link.href}>
+              <FooterLink href={link.href} label={link.label} />
+            </li>
+          ))}
         </ul>
       </nav>
     </footer>
