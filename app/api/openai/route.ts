@@ -184,29 +184,33 @@ async function generateApiResponse(
 
     // 初期応答を生成
     console.log(`[DEBUG] 初期応答生成開始: モデル=${selectedModel}`);
-    const responseContent = await generateInitialResponse(
+    const initialResponse = await generateInitialResponse(
       sanitizedPrompt,
       controller.signal,
       selectedModel
     );
     console.log("[DEBUG] 初期応答生成完了");
 
-    // Web検索が必要かチェック
-    let finalResponse = responseContent;
-    if (needsWebSearchInfo(responseContent)) {
-      console.log("[INFO] Web検索による情報の補完が必要と判断されました");
-      finalResponse = await generateResponseWithWebSearch(
+    // パターンマッチングに基づいてWeb検索の必要性を判断
+    let finalContent = initialResponse;
+
+    // パターンマッチングによる検索判断
+    if (needsWebSearchInfo(initialResponse)) {
+      console.log(
+        "[INFO] パターンマッチングにより、Web検索による情報の補完が必要と判断されました"
+      );
+      finalContent = await generateResponseWithWebSearch(
         sanitizedPrompt,
-        responseContent,
+        initialResponse,
         selectedModel
       );
     }
 
     // Markdownをリッチテキスト(HTML)に変換
-    const htmlContent = await marked(finalResponse);
+    const htmlContent = await marked(finalContent);
 
     return {
-      text: finalResponse,
+      text: finalContent,
       html: htmlContent,
       isMarkdown: true,
     };

@@ -14,7 +14,7 @@ import { useTheme } from "@/hooks/useTheme";
 /**
  * テーマ関連の定数
  */
-const THEME = {
+export const THEME = {
   /**
    * ライトモード
    */
@@ -48,6 +48,10 @@ const ARIA_LABELS = {
 const ThemeToggleButton: FC = () => {
   const { theme, toggleTheme, mounted } = useTheme();
 
+  // テーマに基づいた状態の計算（Hooksの外で通常の変数として計算）
+  const isDarkMode = theme === THEME.DARK;
+  const ariaLabel = isDarkMode ? ARIA_LABELS.TO_LIGHT : ARIA_LABELS.TO_DARK;
+
   // マウント前は何も表示しない（SSRとCSRの不一致を防ぐため）
   if (!mounted) {
     return (
@@ -58,13 +62,6 @@ const ThemeToggleButton: FC = () => {
       ></div>
     ); // プレースホルダー
   }
-
-  // 現在のテーマに基づいてアクセシビリティラベルを決定
-  const ariaLabel =
-    theme === THEME.LIGHT ? ARIA_LABELS.TO_DARK : ARIA_LABELS.TO_LIGHT;
-
-  // ダークモード状態に基づいてスタイルを決定
-  const isDarkMode = theme === THEME.DARK;
 
   return (
     <div className="flex items-center">

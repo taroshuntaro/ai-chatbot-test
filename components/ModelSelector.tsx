@@ -8,7 +8,7 @@
  */
 "use client";
 
-import { FC, ChangeEvent, useCallback } from "react";
+import { FC, ChangeEvent } from "react";
 import {
   AVAILABLE_MODELS,
   MODEL_DISPLAY_NAMES,
@@ -21,9 +21,19 @@ interface ModelSelectorProps {
 }
 
 /**
- * ラベルテキスト
+ * UI表示用の定数
  */
-const LABEL_TEXT = "モデル:";
+const UI_STRINGS = {
+  /**
+   * ラベルテキスト
+   */
+  LABEL_TEXT: "モデル:",
+
+  /**
+   * アクセシビリティラベル
+   */
+  ARIA_LABEL: "AIモデルを選択",
+};
 
 /**
  * モデル選択ドロップダウンコンポーネント
@@ -39,13 +49,10 @@ const ModelSelector: FC<ModelSelectorProps> = ({ selectedModel, onChange }) => {
    *
    * @param e 選択変更イベント
    */
-  const handleChange = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      const newModel = e.target.value as OpenAIModel;
-      onChange(newModel);
-    },
-    [onChange]
-  );
+  const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const newModel = e.target.value as OpenAIModel;
+    onChange(newModel);
+  };
 
   return (
     <div className="flex items-center space-x-2">
@@ -53,14 +60,14 @@ const ModelSelector: FC<ModelSelectorProps> = ({ selectedModel, onChange }) => {
         htmlFor="model-selector"
         className="text-sm font-medium text-gray-700 dark:text-gray-300"
       >
-        {LABEL_TEXT}
+        {UI_STRINGS.LABEL_TEXT}
       </label>
       <select
         id="model-selector"
         value={selectedModel}
         onChange={handleChange}
         className="text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        aria-label="AIモデルを選択"
+        aria-label={UI_STRINGS.ARIA_LABEL}
       >
         {AVAILABLE_MODELS.map((model) => (
           <option key={model} value={model}>

@@ -14,8 +14,7 @@
  */
 "use client";
 
-import { useState, FC, ChangeEvent, KeyboardEvent, useCallback } from "react";
-import { Message } from "@/types/message";
+import { useState, FC, ChangeEvent, KeyboardEvent } from "react";
 import { OpenAIModel } from "@/types/model";
 import ModelSelector from "@/components/ModelSelector";
 import DOMPurify from "dompurify";
@@ -24,21 +23,40 @@ interface InputBarProps {
   input: string;
   setInput: (value: string) => void;
   handleSend: () => void;
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   selectedModel: OpenAIModel;
   onModelChange: (model: OpenAIModel) => void;
 }
 
 /**
- * 入力可能な最大文字数
- * サーバー側の制限（1000文字）と合わせています
+ * 入力関連の定数
  */
-const MAX_INPUT_LENGTH = 1000;
+const INPUT_CONSTANTS = {
+  /**
+   * 入力可能な最大文字数
+   * サーバー側の制限と合わせています
+   */
+  MAX_LENGTH: 1000,
 
-/**
- * 入力欄のプレースホルダーテキスト
- */
-const INPUT_PLACEHOLDER = "メッセージを入力...";
+  /**
+   * 入力欄のプレースホルダーテキスト
+   */
+  PLACEHOLDER: "メッセージを入力...",
+
+  /**
+   * アクセシビリティ用ラベル
+   */
+  ARIA_LABEL: "メッセージ入力",
+
+  /**
+   * 送信ボタンのラベル
+   */
+  SUBMIT_BUTTON_LABEL: "送信",
+
+  /**
+   * 送信ボタンのアクセシビリティラベル
+   */
+  SUBMIT_ARIA_LABEL: "送信",
+};
 
 /**
  * テキストをサニタイズする関数
@@ -49,10 +67,19 @@ const INPUT_PLACEHOLDER = "メッセージを入力...";
  * @returns サニタイズ済みテキスト
  */
 const sanitizeInputText = (text: string): string => {
-  const sanitized = DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
-  return sanitized.substring(0, MAX_INPUT_LENGTH);
+  try {
+    const sanitized = DOMPurify.sanitize(text, { ALLOWED_TAGS: [] });
+    return sanitized.substring(0, INPUT_CONSTANTS.MAX_LENGTH);
+  } catch (error) {
+    console.error("テキストのサニタイズ中にエラーが発生しました:", error);
+    // エラー時は空の文字列を返すことで安全性を確保
+    return "";
+  }
 };
 
+/**
+ * インプットバーコンポーネント
+ */
 const InputBar: FC<InputBarProps> = ({
   input,
   setInput,
@@ -71,8 +98,12 @@ const InputBar: FC<InputBarProps> = ({
    * @param e 変更イベント
    */
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const sanitizedInput = sanitizeInputText(e.target.value);
-    setInput(sanitizedInput);
+    try {
+      const sanitizedInput = sanitizeInputText(e.target.value);
+      setInput(sanitizedInput);
+    } catch (error) {
+      console.error("入力変更処理中にエラーが発生しました:", error);
+    }
   };
 
   /**
@@ -84,9 +115,13 @@ const InputBar: FC<InputBarProps> = ({
    * @param e キーボードイベント
    */
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !isComposing && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    try {
+      if (e.key === "Enter" && !isComposing && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    } catch (error) {
+      console.error("キー入力処理中にエラーが発生しました:", error);
     }
   };
 
@@ -95,7 +130,11 @@ const InputBar: FC<InputBarProps> = ({
    * 日本語などの入力が始まったことを記録
    */
   const handleCompositionStart = () => {
-    setIsComposing(true);
+    try {
+      setIsComposing(true);
+    } catch (error) {
+      console.error("IME入力開始処理中にエラーが発生しました:", error);
+    }
   };
 
   /**
@@ -103,7 +142,11 @@ const InputBar: FC<InputBarProps> = ({
    * 日本語などの入力が確定したことを記録
    */
   const handleCompositionEnd = () => {
-    setIsComposing(false);
+    try {
+      setIsComposing(false);
+    } catch (error) {
+      console.error("IME入力終了処理中にエラーが発生しました:", error);
+    }
   };
 
   /**
@@ -128,9 +171,9 @@ const InputBar: FC<InputBarProps> = ({
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
             className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-none h-16 bg-white dark:bg-gray-700 text-black dark:text-white"
-            placeholder={INPUT_PLACEHOLDER}
-            aria-label="メッセージ入力"
-            maxLength={MAX_INPUT_LENGTH}
+            placeholder={INPUT_CONSTANTS.PLACEHOLDER}
+            aria-label={INPUT_CONSTANTS.ARIA_LABEL}
+            maxLength={INPUT_CONSTANTS.MAX_LENGTH}
           />
           <button
             onClick={handleSend}
@@ -140,9 +183,9 @@ const InputBar: FC<InputBarProps> = ({
                 ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                 : "bg-blue-500 text-white hover:bg-blue-600"
             }`}
-            aria-label="送信"
+            aria-label={INPUT_CONSTANTS.SUBMIT_ARIA_LABEL}
           >
-            送信
+            {INPUT_CONSTANTS.SUBMIT_BUTTON_LABEL}
           </button>
         </div>
       </div>

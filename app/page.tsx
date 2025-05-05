@@ -206,11 +206,6 @@ function saveModelToStorage(model: OpenAIModel): void {
 function LoadingUI() {
   return (
     <div className={STYLES.CONTAINER}>
-      <div className={STYLES.HEADER}>
-        <div className={STYLES.HEADER_CONTENT}>
-          <h1 className={STYLES.TITLE}>{APP_CONFIG.APP_TITLE}</h1>
-        </div>
-      </div>
       <div className={STYLES.LOADING_MESSAGE_CONTAINER}>
         {/* 初期メッセージのみを表示 */}
         <div className={STYLES.LOADING_MESSAGE_AREA}>
@@ -446,17 +441,11 @@ const Home = () => {
 
   return (
     <div className={STYLES.CONTAINER}>
-      <div className={STYLES.HEADER}>
-        <div className={STYLES.HEADER_CONTENT}>
-          <h1 className={STYLES.TITLE}>{APP_CONFIG.APP_TITLE}</h1>
-        </div>
-      </div>
       <MessageList messages={messages} />
       <InputBar
         input={input}
         setInput={setInput}
         handleSend={handleSend}
-        setMessages={setMessages}
         selectedModel={selectedModel}
         onModelChange={handleModelChange}
       />

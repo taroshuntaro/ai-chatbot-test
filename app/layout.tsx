@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import { ReactNode } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import AppLayout from "@/components/AppLayout";
 
 // フォント設定
 const geistSans = Geist({
@@ -38,15 +37,18 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * アプリケーションのルートレイアウトコンポーネント
+ * サーバーコンポーネントとして動作し、フォント設定やメタデータを提供
+ * 状態管理を含む部分はクライアントコンポーネントのAppLayoutに委譲
+ *
+ * @param children レイアウト内に表示する子コンポーネント
+ */
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="ja" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen bg-gray-100 dark:bg-gray-900 text-black dark:text-white font-sans transition-colors duration-200">
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow px-4 sm:px-8">{children}</main>
-          <Footer />
-        </div>
+        <AppLayout>{children}</AppLayout>
       </body>
     </html>
   );

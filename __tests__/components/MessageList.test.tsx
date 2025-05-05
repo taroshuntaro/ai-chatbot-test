@@ -165,11 +165,17 @@ describe("MessageList コンポーネント", () => {
     const container = document.querySelector('[class*="overflow-y-auto"]');
     expect(container).toBeInTheDocument();
 
-    // 異なるメッセージタイプが適切なスタイルを持つことを確認
-    const userMessage = document.querySelector(".bg-gray-300");
-    expect(userMessage).toBeInTheDocument();
+    // メッセージの存在を確認（justify-endはユーザー、justify-startはボットのメッセージ）
+    const userMessageContainer = document.querySelector(".flex.justify-end");
+    expect(userMessageContainer).toBeInTheDocument();
 
-    const botMessage = document.querySelector(".bg-blue-600");
-    expect(botMessage).toBeInTheDocument();
+    const botMessageContainer = document.querySelector(".flex.justify-start");
+    expect(botMessageContainer).toBeInTheDocument();
+
+    // メッセージのテキスト内容も確認
+    expect(screen.getByText("こんにちは！")).toBeInTheDocument();
+    expect(
+      screen.getByText("こんにちは！どのようにお手伝いできますか？")
+    ).toBeInTheDocument();
   });
 });

@@ -71,8 +71,15 @@ const LOG_MESSAGES = {
  * システムプロンプトの定義
  */
 const SYSTEM_PROMPTS = {
+  /**
+   * 初期応答用のシステムプロンプト
+   */
   INITIAL_RESPONSE:
     "あなたは親切なアシスタントです。質問に対して最新の情報がない場合は、明確にその旨を伝えてください。「私の知識は〇〇までです」などと正直に答えてください。",
+
+  /**
+   * Web検索用のシステムプロンプト
+   */
   WEB_SEARCH:
     "あなたは親切なアシスタントです。提供された最新のWeb検索結果を参考にして、ユーザーの質問に回答してください。検索結果を適切に引用し、ソースを明示してください。",
 };
@@ -159,7 +166,7 @@ async function callOpenAI(
  * @param prompt ユーザーの質問
  * @param signal アボートシグナル（タイムアウト用）
  * @param model 使用するLLMモデル
- * @returns AIの初期応答
+ * @returns AIの初期応答テキスト
  */
 export async function generateInitialResponse(
   prompt: string,
@@ -183,7 +190,7 @@ export async function generateInitialResponse(
     { role: "user" as const, content: prompt },
   ];
 
-  return callOpenAI(model, messages, signal);
+  return await callOpenAI(model, messages, signal);
 }
 
 /**

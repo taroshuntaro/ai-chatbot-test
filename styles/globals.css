@@ -3,11 +3,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * ルート変数の定義
+ * アプリケーション全体で使用する色の変数
+ */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
+/**
+ * ダークモード用の変数
+ * システム設定に基づくダークモード対応
+ */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -15,7 +23,10 @@
   }
 }
 
-/* テーマ切り替え用のスタイル */
+/**
+ * テーマ切り替え用のスタイル
+ * 明示的なテーマ設定のための変数
+ */
 [data-theme="light"] {
   --background: #ffffff;
   --foreground: #171717;
@@ -26,10 +37,12 @@
   --foreground: #ededed;
 }
 
-/* Apple風のデザインの基本スタイル */
+/**
+ * 基本レイアウトスタイル
+ * グラデーションを削除し、シンプルな背景色に変更
+ */
 html,
 body {
-  @apply bg-gradient-to-b from-gray-100 to-gray-300;
   margin: 0;
   padding: 0;
   height: 100%;
@@ -37,7 +50,7 @@ body {
 }
 
 body {
-  @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-sans;
+  @apply text-black dark:text-white font-sans;
   display: flex;
   flex-direction: column;
   background-color: var(--background);
@@ -62,7 +75,7 @@ h3 {
 }
 
 p {
-  @apply text-gray-700;
+  @apply text-gray-700 dark:text-gray-300;
 }
 
 /* セクションカードのスタイル */
